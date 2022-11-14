@@ -9,7 +9,7 @@ rm(cred)
 
 #### Schritt 3: Datendownload ####
 channel_ID <- "UCknLrEdhRCp1aegoMqRaCZg"  # numerische ID des DW-Channels
-video_stats <- get_channel_stats(channel_ID) 
+channel_stats <- get_channel_stats(channel_ID) 
 
 ##### 3.1 Liste relevanter Videos #####
 video_list <- yt_search(term = "terror|terrorism|terrorist",
