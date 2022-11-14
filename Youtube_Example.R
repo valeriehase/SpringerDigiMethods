@@ -1,6 +1,4 @@
-
 #### Schritt 1: Aktivierung notwendiger Software-Pakete ####
-
 library("tuber")
 library("tidyverse")
 
@@ -10,7 +8,7 @@ yt_oauth(cred$ID, cred$secret)
 rm(cred)
 
 #### Schritt 3: Datendownload ####
-channel_ID <- "UCknLrEdhRCp1aegoMqRaCZg"
+channel_ID <- "UCknLrEdhRCp1aegoMqRaCZg"  # numerische ID des DW-Channels
 video_stats <- get_channel_stats(channel_ID) 
 
 ##### 3.1 Liste relevanter Videos #####
@@ -27,9 +25,7 @@ videos_infos <- video_list$video_id %>%
 video_list <- merge(video_list, videos_infos, by.x = "video_id", by.y = "id")
 
  ##### 3.3 Popularitätsmetriken (Kommentare) zu relevanten Videos #####
- comments <- video_list$video_id %>% map(function(x) get_all_comments(x)) %>%
+comments <- video_list$video_id %>% map(function(x) get_all_comments(x)) %>%
   bind_rows(.id = "column_label") %>% 
   select(-column_label) %>% 
   filter(is.na(parentId)==T)
-
-
