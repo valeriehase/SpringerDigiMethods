@@ -2,14 +2,16 @@
 library("tuber")
 library("tidyverse")
 
-#### Schritt 2: Login Youtube API via tuber ####
-cred <- read.csv("Documents/cred.txt") #.txt Dokument mit API-Zugangsdaten
-yt_oauth(cred$ID, cred$secret) 
-rm(cred)
+#### Schritt 2: Login Youtube-API via tuber ####
+# API-Zugangsdaten liegen in separater Datei "api-login.txt"
+login_details <- read.csv(file = "api-login.txt")
+yt_oauth(app_id = login_details$ID, 
+         app_secret = login_details$secret) 
 
 #### Schritt 3: Datendownload ####
-channel_ID <- "UCknLrEdhRCp1aegoMqRaCZg"  # numerische ID des DW-Channels
-channel_stats <- get_channel_stats(channel_ID) 
+# Die YouTube-interne "Channel-ID" der Deutschen Welle lautet wiefolgt
+channel_ID <- "UCknLrEdhRCp1aegoMqRaCZg"
+channel_stats <- get_channel_stats(channel_id = channel_ID) 
 
 ##### 3.1 Liste relevanter Videos #####
 video_list <- yt_search(term = "terror|terrorism|terrorist",
@@ -17,15 +19,22 @@ video_list <- yt_search(term = "terror|terrorism|terrorist",
                         published_after = "2021-08-26T00:00:00Z", 
                         published_before = "2021-08-31T00:00:00Z")
 
- ##### 3.2 Popularitätsmetriken (Likes, Shares) zu relevanten Videos #####
-videos_infos <- video_list$video_id %>% 
+##### 3.2 Popularitätsmetriken (Likes, Shares) zu relevanten Videos ####
+videos_infos <- 
+  video_list$video_id %>% 
   map(function(x) get_stats(x)) %>%
   bind_rows(.id = "column_label") %>% 
   select(-column_label)
-video_list <- merge(video_list, videos_infos, by.x = "video_id", by.y = "id")
+video_list <- 
+  video_list %>% 
+  merge(y = videos_infos, 
+        by.x = "video_id", 
+        by.y = "id")
 
- ##### 3.3 Popularitätsmetriken (Kommentare) zu relevanten Videos #####
-comments <- video_list$video_id %>% map(function(x) get_all_comments(x)) %>%
+##### 3.3 Popularitätsmetriken (Kommentare) zu relevanten Videos #####
+comments <- 
+  video_list$video_id %>% 
+  map(function(x) get_all_comments(x)) %>%
   bind_rows(.id = "column_label") %>% 
   select(-column_label) %>% 
-  filter(is.na(parentId)==T)
+  filter(is.na(parentId))
